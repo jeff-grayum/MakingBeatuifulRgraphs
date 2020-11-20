@@ -1,0 +1,136 @@
+---
+title: "Beautiful R Graphs"
+author: "Jeff Grayum"
+date: "11/20/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(gapminder)
+library(ggthemes)
+#install.packages("extrafont")
+library(extrafont)
+```
+
+```{r}
+big_america <- gapminder %>%
+  filter(country %in% c("Canada", "Puerto Rico", "Mexico", "United States", "Costa Rica", "Brazil")) %>%
+  view()
+        
+ #Use %in% instead of == for filter()! Otherwise, you only get one observation for each country.
+```
+
+Step 1. Add labels and titles using labs()
+```{r}
+big_america %>%
+  ggplot(aes(year, gdpPercap, color = country)) +
+  geom_line() +
+  labs(title = "GDP per capita trends in American countries",
+       subtitle = "From 1950 - 2007",
+       x = "Year",
+       y = "GDP per capita",
+       color = "")
+```
+
+
+Step 2.  Set a theme using ggthemes()
+```{r}
+big_america %>%
+  ggplot(aes(year, gdpPercap, color = country)) +
+  geom_line() +
+  labs(title = "GDP per capita trends in large American countries",
+       subtitle = "From 1950 - 2007",
+       x = "Year",
+       y = "GDP per capita",
+       color = "") +
+  theme_fivethirtyeight() + #notice how theme removes axis labes! Add them.
+  theme(axis.title = element_text())
+```
+
+
+Step 3. Emphasize your data! Makes lines thicker (size), add opacity (alpha). Highlight some countries, use mutate to add column to do this.
+```{r}
+big_america %>%
+  mutate(isUnitedStates = (country == "United States")) %>%
+  ggplot(aes(year, gdpPercap, color = country)) +
+  geom_line(aes(linetype = isUnitedStates), size = 1.5, alpha = 0.8) +
+  labs(title = "GDP per capita trends in large American countries",
+       subtitle = "From 1950 - 2007",
+       x = "Year",
+       y = "GDP per capita",
+       color = "") +
+  theme_fivethirtyeight() + 
+  theme(axis.title = element_text()) +
+  scale_linetype_manual(values = c("dashed", "solid"), guide = "none") 
+#false values dashed, true values solid. Guide = "none removes ugly legend.
+  
+  
+```
+
+
+Step 4.  Add some color!  Use scale_color_brewer and select palette.
+```{r}
+big_america %>%
+  mutate(isUnitedStates = (country == "United States")) %>%
+  ggplot(aes(year, gdpPercap, color = country)) +
+  geom_line(aes(linetype = isUnitedStates), size = 1.5, alpha = 0.8) +
+  labs(title = "GDP per capita trends in large American countries",
+       subtitle = "From 1950 - 2007",
+       x = "Year",
+       y = "GDP per capita",
+       color = "") +
+  theme_fivethirtyeight() + 
+  theme(axis.title = element_text()) +
+  scale_linetype_manual(values = c("dashed", "solid"), guide = "none") +
+  scale_color_brewer(palette = "Set2")
+
+#scale_color_brewer() = scale_fill_brewer() when running boxplots, etc.
+
+
+#Now lets use our own colors, using scale_color_manual()! Select from color picker in google.
+
+
+myColors <- c("#0012b3", "#d61818", "#c1d15a", "#15959e", "#000000", "#705e42") #NOTE next take note of which hex is which color!  
+
+big_america %>%
+  mutate(isUnitedStates = (country == "United States")) %>%
+  ggplot(aes(year, gdpPercap, color = country)) +
+  geom_line(aes(linetype = isUnitedStates), size = 1.5, alpha = 0.8) +
+  labs(title = "GDP per capita trends in large American countries",
+       subtitle = "From 1950 - 2007",
+       x = "Year",
+       y = "GDP per capita",
+       color = "") +
+  theme_fivethirtyeight() + 
+  theme(axis.title = element_text()) +
+  scale_linetype_manual(values = c("solid", "dashed"), guide = "none") +
+  scale_color_manual(values = myColors)
+```
+
+Step 5.  Improve the font, using the extrafont package.
+```{r}
+font_import() #Must run the first time you use extrafont package
+fonts() #view your fonts!
+
+big_america %>%
+  mutate(isUnitedStates = (country == "United States")) %>%
+  ggplot(aes(year, gdpPercap, color = country)) +
+  geom_line(aes(linetype = isUnitedStates), size = 1.5, alpha = 0.8) +
+  labs(title = "GDP per capita trends in large American countries",
+       subtitle = "From 1950 - 2007",
+       x = "Year",
+       y = "GDP per capita",
+       color = "") +
+  theme_fivethirtyeight() + 
+  theme(axis.title = element_text(), text = element_text(family = "Times New Roman")) +
+  scale_linetype_manual(values = c("solid", "dashed"), guide = "none") +
+  scale_color_manual(values = myColors)
+```
+
